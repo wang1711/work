@@ -1,0 +1,363 @@
+﻿<html>
+<head>
+<style type="text/css">
+li{
+	list-style-type:none;
+	margin:7.5px;
+
+
+}
+.top{
+	display:flex;
+	margin-left:12.5%;
+
+	
+}
+.top_1{
+	display:flex;
+	text-align:center;
+	margin-left:12.5%;
+	
+}
+.big_box{
+	display:flex;
+	
+	height:230px;
+	width:1201px;
+}
+.left_box{
+	display:flex;
+	margin-left:14%;
+	height:230px;
+	width:450px;
+}
+
+
+.right_box{
+	display:flex;
+	flex-wrap:wrap;
+	margin-left:1px;
+	height:230px;
+	width:500px;
+}
+
+
+.img{
+	height:130px;
+	width:100%;
+}
+
+
+//搜索栏
+.content{
+	width:150px;
+	height:105px;
+	margin:6px;
+}
+.search{
+        margin: 30px;
+        width: 19.85%;
+        height:33px;
+        border:1px solid silver ;
+		margin-left:66.5%;
+		border-radius: 4px; 
+		z-index:999;
+		position::absolute; 
+    }
+    .search_key{
+        width: 77%;
+        height: 25px;
+        border: none;
+        margin-top: 5px; 
+        margin-left: 5px; 
+		   
+    }
+    .submit{
+        background:url(搜索.jpg);
+        margin-top: 5px;
+		margin-right: 5px;
+        width:40px;
+        height: 25px;
+        border: none;
+	    opacity:0.3;
+/*搜索框的样式这个添加背景图即可*/ 
+    }
+.ranking{
+	margin-left: 61.4%;
+	position:absolute;
+	
+	background:url(排行榜.jpg);
+	background-size:61px 38px;
+        width: 59px;
+        height:36px;
+        border:1px solid silver ;
+	
+		
+		border-radius: 4px; 
+	}
+
+
+
+
+//跳转栏
+
+ul.pagination {
+    display: inline-block;
+    padding: 0;
+    margin: 0;
+}
+
+ul.pagination li {display: block;}
+
+ul.pagination li a {
+    color: black;
+    float: left;
+    padding: 8px 16px;
+    text-decoration: none;
+    transition: background-color .3s;
+    border: 1px solid #ddd;
+}
+
+ul.pagination li a.active {
+    background-color: #4CAF50;
+    color: white;
+    border: 1px solid #4CAF50;
+}
+
+
+a{
+font-size:7.5px;
+}
+
+
+ul.pagination li a:hover:not(.active) {background-color: #ddd;}
+
+
+.center{margin-left:80%;
+	right:240px;
+	top:8.7%px;
+	display:flex;
+	height:10.97%;
+	position:fixed;
+	flex-wrap:wrap;
+	width:20px;}
+
+
+
+
+
+
+
+
+
+</style>
+</head>
+<body>
+<div class="top" id="top">
+<li>主站
+<li>音频
+<li>游戏中心
+<li>直播
+<li>会员购
+<li>漫画
+<li>BW
+
+<li>70年
+<li>下载APP
+<li>投稿
+
+<li>动态
+<li>历史  
+</div>
+<img class="img" src="国庆.jpg"  title="寻找历史的追梦者的足迹" target="_blank" class="banner-link" />
+
+
+</head>
+
+
+
+
+
+<body>
+<form action="" method="post">
+
+
+
+
+ <d class="ranking"></d>
+    <div class="search">
+     
+        <input type="text" class="search_key" value="read" />
+      <input type="submit" class="submit" value="搜索">
+    </div>
+ 
+</form>
+
+
+<div class="top_1">
+<li>首页
+<li>动画
+<li>番剧
+<li>国创
+<li>音乐
+<li>舞蹈
+<li>游戏
+<li>科技
+<li>数码
+<li>生活
+<li>鬼畜
+<li>时尚
+<li>广告
+<li>音乐
+<li>娱乐
+<li>影视
+<li>放映厅
+<li>专栏
+<li>广场
+<li>直播
+<li>小黑屋
+
+</div>
+
+
+
+
+
+<div class="big_box">
+
+
+
+
+<div class="left_box"><img width="auto" height="220px" src="change00.jpg" id="obj" title=""></img>
+</div>
+<script>
+
+
+
+
+
+
+//循环语句调用图片路径
+var img_href={
+	img01:"01.jpg",
+	img02:"02.jpg",
+	img03:"03.jpg",
+	img04:"04.jpg",
+	img05:"05.jpg",
+	img06:"06.jpg"
+};
+
+document.write("<div class=\"right_box\" >  ");
+
+for (var href in img_href){
+	document.write("<div> <img  class=\"content\" src=\""  +img_href[href]+   "\"> </img> </div>");
+	
+}
+document.write("</div>  ");
+var curIndex=0;
+
+var timeInterval=1000;
+var arr=new Array();
+arr[0]="change01.jpg";
+arr[1]="change02.jpg";
+arr[2]="change03.jpg";
+arr[3]="change04.jpg";
+arr[4]="change05.jpg";
+
+setInterval(changeImg,timeInterval);
+function changeImg()
+{
+var obj=document.getElementById("obj");
+if (curIndex==arr.length-1)
+{
+curIndex=0;
+}
+else
+{
+curIndex+=1;
+}
+obj.src=arr[curIndex];
+}
+
+</script>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div class="center">
+  <ul class="pagination">
+    <li><a href="#top">«</a></li>
+    <li><a href="#">直播</a></li>
+    <li><a class="active" href="#">动漫</a></li>
+    <li><a href="#">番剧</a></li>
+    <li><a href="#">国创</a></li>
+    <li><a href="#">漫画</a></li>
+    <li><a href="#">音乐</a></li>
+    <li><a href="#">舞蹈</a></li>
+    <li><a href="http://www.mihayo.com">游戏</a></li>
+    <li><a href="#">»</a></li>
+  </ul>
+</div>
+
+
+
+
+
+
+</div>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+</html>
+
+
+
+
+
+
+
+
+
+

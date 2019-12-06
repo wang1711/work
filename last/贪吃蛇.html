@@ -1,0 +1,305 @@
+<p align="center">键盘方向键控制方向</p>
+<script>
+// 思路分析
+// 三个对象  map  snake  Food 
+// map 宽800px和高500px  可以整除 snake每节的宽度
+// food 宽10px 高10px 相当于每一节蛇的宽度  同样有（x，y)
+// snake 不是一个整体，分为三节  头 身 尾  每节都有自己的坐标（x,y)，但是三节又是连着的
+
+// 功能介绍
+/*
+ 通过蛇头吃到在界面上随机出现的点，然后增加自身的长度
+ 增加的原理：就是在body数组中增加一条数据，吃到一个点后，重新创建一条蛇
+ 点（food）：界面上的点每隔一定时间会随机出现，因为点是一个对象，我们把界面上所有随机出现的点放在一个allFood数组中，当蛇吃到点后，会去这个数组中匹配吃到的那个点，然后移除该点（这样做游戏的性能会比较差，因为当界面上点很多很多的时候，这个判断就比较费时了，时间复杂度貌似O(n))
+ 空格键控制暂停开始，以及蛇的速度，原理：修改定时器的时间，时间越小，蛇移动越快
+*/
+
+// 蛇的移动方式
+/*
+ 1、蛇的移动方向由蛇头控制
+ 2、后一个节点走到前一个节点的位置上，头的位置是我们控制的
+ 3、移动的距离是一个点的单位长度，而不是px，这个根据自己的点大小进行控制
+ 4、移动的范围是在地图内，注意：蛇不是以px移动的，所以一上面的为例，蛇的移动范围在 0<=x<=800  0<=y<=500,但是这是距离，水平移动的次数 0~80 垂直移动的次数 0~50
+*/
+
+// 蛇的死亡情况
+/*
+ 1、当蛇头碰到边界的时候
+ 2、当蛇头碰到自身的时候
+*/
+    var map = new Map();
+    var food = new Food();
+    var snake = new Snake();
+    var speed = 200;
+    var allFood = [];
+    allFood.push(food);
+    
+    var timeId1 = setInterval(() => {
+        var food = new Food();
+        allFood.push(food);
+    }, 5000);
+
+    var timeId = setInterval("snake.move(timeId,timeId1,allFood)", speed);
+
+    var isPause = true;
+    document.onkeydown = function (e) {
+        switch (e.keyCode) {
+            case 37:
+                if (snake.direction != "right") {
+                    snake.direction = "left";
+                }
+                break;
+            case 38:
+                if (snake.direction != "down") {
+                    snake.direction = "up";
+                }
+                break;
+            case 39:
+                if (snake.direction != "left") {
+                    snake.direction = "right";
+                }
+                break;
+            case 40:
+                if (snake.direction != "up") {
+                    snake.direction = "down";
+                }
+                break;
+            case 32:
+                if (isPause) {
+                    clearInterval(timeId);
+                    isPause = false;
+                } else {
+                    speed -= 50;
+                    if (speed <= 50) speed = 50;
+                    timeId = setInterval("snake.move(timeId,timeId1,allFood)", speed);
+                    isPause = true;
+                }
+                break;
+        }
+    }
+
+
+var count = 0;//初始分数
+// 定义地图对象构造函数
+function Map() {
+    // 设置地图对象的宽高和背景色
+    this.width = 800;
+    this.height = 500;
+    this.bgColor = "#000";
+
+    // 创建map对象，并且显示在界面上
+    this.showMap = function () {
+        var map = document.createElement("div");
+        map.setAttribute("id", "map");
+        map.style.width = this.width + "px";
+        map.style.height = this.height + "px";
+        map.style.position = "relative";
+        map.style.backgroundColor = this.bgColor;
+        map.style.margin = "50px auto";
+        document.body.appendChild(map);
+        var score = document.createElement("div");
+        score.setAttribute("id", "score");
+        score.style.width = this.width + "px";
+        score.style.height = "50px";
+        score.style.position = "absolute";
+        score.style.top = "-50px";
+        score.style.left = "0px";
+        score.style.backgroundColor = "#ccc";
+        score.innerText = "当前分数:" + count;
+        map.appendChild(score);
+    }
+    // 调用方法，创建对象
+    this.showMap();
+}
+// 定义食物对象构造函数
+function Food() {
+    this.width = 10;
+    this.height = 10;
+    this.color = "#fff";
+
+    this.showFood = function () {
+        var food = document.createElement("div");
+        this.node = food;
+        food.style.width = this.width + "px";
+        food.style.height = this.height + "px";
+        food.style.backgroundColor = this.color;
+        food.style.borderRadius = "50%";
+        food.style.position = "absolute";
+        // 现在map对象的宽度是800 ，而Food对象的宽度是10 ，相当于 x的坐标取值∈[0,79]
+        // 如果取到80.那么 * this.width后就会Food的left就是800 就会超过map
+        this.x = parseInt(Math.random() * 79);
+        this.y = parseInt(Math.random() * 49);
+        // 随机出现在地图上
+        /* 
+            如果上面直接取800或500内的随机数，就会导致出现在不能被蛇吃到，
+            还有一点就是会超出边界， 比如 794 + this.width = 804 
+            同样的，这个点就会导致snake无法吃到，因为蛇的移动是以 10px 为一个移动单位的
+        */
+        food.style.left = this.x * this.width + "px";
+        food.style.top = this.y * this.height + "px";
+        var map = document.querySelector('#map');
+        map.appendChild(food);
+    }
+    this.showFood();
+}
+// 定义蛇对象构造函数
+function Snake() {
+    this.width = 10;
+    this.height = 10;
+    this.direction = "right"; // 默认向右移动
+
+    // 定义初始的蛇，之后吃到food后就会往这个数组中添加吃到的food
+    // posX 设置的是蛇尾的位置，初始的时候蛇长 为 3 个单位， 所以蛇尾的取值在 [0,77]之间
+    var posX = parseInt(Math.random() * 77);
+    // var posX = 77;
+    var posY = parseInt(Math.random() * 49);
+    this.body = [
+        { x: posX + 2, y: posY, color: "darkblue" }, // 定义初始蛇头的位置  
+        { x: posX + 1, y: posY, color: "darkcyan" },  // 定义初始蛇身的位置
+        { x: posX, y: posY, color: "skyblue" }   // 定义初始蛇尾的位置
+    ];
+
+    var map = document.querySelector('#map');
+
+    // 显示蛇
+    this.showSnake = function () {
+        for (var i = 0; i < this.body.length; i++) {
+            var s = document.createElement("div");
+            this.body[i].node = s;
+            s.style.width = this.width + "px";
+            s.style.height = this.height + "px";
+            s.style.backgroundColor = this.body[i].color;
+            s.style.borderRadius = "50%";
+            s.style.position = "absolute";
+            s.style.left = this.body[i].x * this.width + "px";
+            s.style.top = this.body[i].y * this.height + "px";
+            map.appendChild(s);
+        }
+    }
+
+
+    /* 
+        移动规则：只控制蛇头的方向，后续节点到前一个节点的位置上
+    */
+    this.move = function (timeId, timeId1, allFood) {
+
+        for (var i = this.body.length - 1; i > 0; i--) {
+            this.body[i].x = this.body[i - 1].x;
+            this.body[i].y = this.body[i - 1].y;
+        }
+
+        switch (this.direction) {
+            case "right":
+                // 蛇头的x坐标往右移动一个单位
+                this.body[0].x += 1;
+                break;
+            case "left":
+                this.body[0].x -= 1;
+                break;
+            case "up":
+                // 蛇头往上，距离map的顶边距离就越小，所以是减一个单位
+                this.body[0].y -= 1;
+                break;
+            case "down":
+                this.body[0].y += 1;
+                break;
+        }
+        for (var i = 0; i < allFood.length; i++) {
+            // 当蛇头的坐标和Food的坐标一致的时候就表示吃到点了
+            if (this.body[0].x == allFood[i].x && this.body[0].y == allFood[i].y) {
+                // if (this.body[0].x == food.x && this.body[0].y == food.y) {
+                /* 
+                    为什么这么赋值？
+                    这一次的移动执行完之后，到下一次的移动时就会让后一个点的坐标等于前一个的坐标
+                    因此下一次的时候就可以给这个点赋坐标了
+                */
+                this.body.push({ x: null, y: null, color: "skyblue", node: null })
+                // 把吃掉的那个点从map上移除
+                map.removeChild(allFood[i].node);
+                allFood.splice(i, 1);
+                // 重新生成新的点
+                // food.showFood();
+                count++;
+                score.innerText = "当前分数:" + count;
+            }
+        }
+
+        // 死亡情况，1、撞边界
+        if (this.body[0].x < 0 || this.body[0].x >= 80 || this.body[0].y < 0 || this.body[0].y >= 50) {
+            clearInterval(timeId);
+            clearInterval(timeId1);
+            alert("GAME OVER!");
+
+            // 移除死蛇
+            for (var i = 0; i < this.body.length; i++) {
+                /* 
+                    极限情况，当Food处于（790,0）的位置，蛇刚吃到就死了，导致还未在界面上创建出节点
+                    所以这个情况下的node是不用移除的
+                */
+                if (this.body[i].node != null) {
+                    map.removeChild(this.body[i].node);
+                }
+            }
+            // 游戏重置
+            var posX = parseInt(Math.random() * 77);
+            var posY = parseInt(Math.random() * 49);
+            this.body = [
+                { x: posX + 2, y: posY, color: "darkblue" }, // 定义初始蛇头的位置  
+                { x: posX + 1, y: posY, color: "darkcyan" },  // 定义初始蛇身的位置
+                { x: posX, y: posY, color: "skyblue" }   // 定义初始蛇尾的位置
+            ];
+            this.direction = "right";
+            this.showSnake();
+            location.reload();
+            return false;
+        }
+        // 死亡情况，2、咬自己
+        for (var i = 4; i < this.body.length; i++) {
+            // 因为只有从第5节开始，蛇才可能咬到自己
+            if (this.body[0].x == this.body[i].x && this.body[0].y == this.body[i].y) {
+                clearInterval(timeId);
+                clearInterval(timeId1);
+                alert("GAME OVER,咬到自己了!")
+
+                // 移除死蛇
+                for (var i = 0; i < this.body.length; i++) {
+                    /* 
+                        极限情况，当Food处于（790,0）的位置，蛇刚吃到就死了，导致还未在界面上创建出节点
+                        所以这个情况下的node是不用移除的
+                    */
+                    if (this.body[i].node != null) {
+                        map.removeChild(this.body[i].node);
+                    }
+                }
+                // 游戏重置
+                var posX = parseInt(Math.random() * 77);
+                var posY = parseInt(Math.random() * 49);
+                this.body = [
+                    { x: posX + 2, y: posY, color: "darkblue" }, // 定义初始蛇头的位置  
+                    { x: posX + 1, y: posY, color: "darkcyan" },  // 定义初始蛇身的位置
+                    { x: posX, y: posY, color: "skyblue" }   // 定义初始蛇尾的位置
+                ];
+                this.direction = "right";
+                this.showSnake();
+                location.reload();
+                return false;
+            }
+        }
+
+        /* 
+            移除原因：
+                让后面的点往前移动一节，但是最后一节一直没有删除，导致蛇长增加
+                移除后调用showSnake()方法，根据现有的body长度进行生成蛇
+        */
+        for (var i = 0; i < this.body.length; i++) {
+            // 因为执行显示的代码在下面，表示现在蛇的node还没有存值
+            if (this.body[i].node != null) {
+                map.removeChild(this.body[i].node);
+            }
+        }
+        this.showSnake();
+    }
+}
+
+
+</script>
